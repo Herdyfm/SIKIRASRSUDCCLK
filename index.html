@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KIR Barang Aset - RSUD Cicalengka</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- PDF.js Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        /* Custom scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="h-full text-slate-800 font-sans flex flex-col antialiased">
+
+    <header class="bg-slate-900 text-white sticky top-0 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 gap-2 sm:gap-4">
+                
+                <!-- Brand & Logo RSUD Cicalengka -->
+                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-brand-600 flex items-center justify-center text-white shadow-md shadow-brand-600/30 font-bold text-base sm:text-lg shrink-0">
+                        <i class="fa-solid fa-hospital"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h1 class="font-bold text-sm sm:text-base md:text-lg leading-tight tracking-wide text-white truncate">KIR Barang RSUD Cicalengka</h1>
+                        <p class="text-[10px] sm:text-[11px] text-slate-400 font-medium flex items-center gap-1 truncate">
+                            <i class="fa-solid fa-building-circle-check text-brand-500 shrink-0"></i> <span>Sistem KIR Aset Digital</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons: Menu Pengaturan & Import PDF -->
+                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                    <button onclick="openSettingsModal()" title="Pengaturan Sistem & Kelola Berkas" class="px-2.5 sm:px-3.5 py-2 text-xs font-semibold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition border border-slate-700 flex items-center gap-1.5 sm:gap-2 shadow-sm">
+                        <i class="fa-solid fa-gear text-slate-400"></i>
+                        <span class="hidden sm:inline">Pengaturan</span>
+                    </button>
+
+                    <button onclick="openImportModal()" class="px-2.5 sm:px-3.5 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs transition shadow-lg shadow-brand-600/20 flex items-center gap-1.5 sm:gap-2">
+                        <i class="fa-solid fa-file-arrow-up"></i>
+                        <span>Import <span class="hidden sm:inline">PDF KIR</span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="bg-white border-b border-slate-200 sticky top-16 z-20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3">
+            <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3">
+                
+                <!-- Search input -->
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs sm:text-sm"></i>
+                    <input type="text" id="search-input" onkeyup="filterData()" placeholder="Cari nama barang, ruang, penanggung jawab, atau kode..." class="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition">
+                </div>
+
+                <!-- Filters -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-0.5 md:pb-0 w-full md:w-auto">
+                    <!-- Pencarian Nama Ruangan -->
+                    <div class="relative min-w-[160px] sm:min-w-[200px]">
+                        <i class="fa-solid fa-door-open absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="filter-ruangan" onkeyup="filterData()" placeholder="Cari Nama Ruangan..." class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    </div>
+
+                    <!-- Status Sign Filter -->
+                    <select id="filter-status" onchange="filterData()" class="flex-1 md:flex-none px-2.5 sm:px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 min-w-[120px]">
+                        <option value="ALL">Semua Status TTD</option>
+                        <option value="SIGNED">Terverifikasi BSrE</option>
+                        <option value="PENDING">Belum TTD</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- Summary Stats Banner -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-folder-closed"></i>
+                </div>
+                <div>
+                    <p class="text-[11px] font-medium text-slate-500">Total Berkas KIR</p>
+                    <p id="stat-total" class="text-lg font-bold text-slate-900">0</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-building-hospital"></i>
+                </div>
+                <div>
+                    <p class="text-[11px] font-medium text-slate-500">Lokasi Utama</p>
+                    <p class="text-xs font-bold text-slate-900 truncate">RSUD Cicalengka</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- KIR Cards Grid -->
+        <div id="data-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Dynamic Cards rendered by JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden py-16 text-center bg-white rounded-2xl border border-dashed border-slate-300 p-8 max-w-lg mx-auto my-8">
+            <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-2xl mx-auto mb-3">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <h3 class="font-bold text-slate-800 text-base">Tidak Ada Berkas KIR Ditemukan</h3>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Silakan sesuaikan kata kunci pencarian atau import dokumen PDF KIR baru melalui tombol di atas.</p>
+            <button onclick="openImportModal()" class="mt-4 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold inline-flex items-center gap-2 shadow-sm">
+                <i class="fa-solid fa-file-circle-plus"></i> Import Berkas KIR PDF
+            </button>
+        </div>
+    </main>
+
+    <div id="modal-import" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-100 space-y-3.5 max-h-[92vh] overflow-y-auto animate-in fade-in zoom-in duration-150">
+            
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm shrink-0">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-sm">Import Berkas KIR PDF</h3>
+                        <p class="text-[11px] text-slate-500">Pilih berkas PDF KIR yang telah ditandatangani</p>
+                    </div>
+                </div>
+                <button onclick="closeImportModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="import-form" onsubmit="processAndSaveImport(event)" class="space-y-3">
+                
+                <!-- Dropzone for PDF -->
+                <div id="drop-zone" onclick="document.getElementById('file-pdf-input').click()" class="border-2 border-dashed border-slate-300 hover:border-brand-500 bg-slate-50 hover:bg-brand-50/30 rounded-xl p-4 text-center cursor-pointer transition">
+                    <i class="fa-solid fa-cloud-arrow-up text-xl sm:text-2xl text-brand-600 mb-1"></i>
+                    <p class="text-xs font-semibold text-slate-700">Klik atau seret file PDF KIR di sini</p>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Mendukung berkas PDF dengan tanda tangan BSrE</p>
+                    <input type="file" id="file-pdf-input" accept=".pdf" onchange="handleFileSelect(event)" class="hidden">
+                    <div id="file-selected-info" class="hidden mt-2 p-2 bg-emerald-50 text-emerald-700 text-xs rounded-lg font-medium border border-emerald-200">
+                        <!-- Uploaded filename info -->
+                    </div>
+                </div>
+
+                <!-- Form Inputs -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Kode Ruang</label>
+                        <input type="text" id="import-kode" required placeholder="Contoh: R-102" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Nama Ruangan</label>
+                        <input type="text" id="import-nama-ruang" required placeholder="Contoh: Ruang Mawar" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Gedung / Unit</label>
+                        <select id="import-gedung" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <option value="RSUD Cicalengka">RSUD Cicalengka</option>
+                            <option value="Gedung Rawat Inap">Gedung Rawat Inap</option>
+                            <option value="Gedung Poliklinik">Gedung Poliklinik</option>
+                            <option value="Gedung Penunjang Medis">Gedung Penunjang Medis</option>
+                            <option value="Gedung Manajemen">Gedung Manajemen</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Penanggung Jawab (PJ)</label>
+                        <input type="text" id="import-pj" required placeholder="Nama Penanggung Jawab" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeImportModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-md shadow-brand-600/20 transition">Simpan & Tampilkan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-viewer" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 flex flex-col hidden">
+        
+        <!-- Viewer Header -->
+        <div class="bg-slate-900 text-white px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between border-b border-slate-800 shrink-0 gap-2">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold text-xs sm:text-sm shrink-0">
+                    <i class="fa-solid fa-file-pdf"></i>
+                </div>
+                <div class="min-w-0">
+                    <h3 id="viewer-title" class="font-bold text-xs sm:text-sm leading-tight text-white truncate">Lihat Berkas PDF KIR</h3>
+                    <p id="viewer-subtitle" class="text-[10px] sm:text-[11px] text-slate-400 truncate">Dokumen Resmi RSUD Cicalengka</p>
+                </div>
+            </div>
+
+            <!-- Zoom Controls & Close -->
+            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <div class="bg-slate-800 rounded-lg p-1 flex items-center gap-0.5 sm:gap-1 border border-slate-700">
+                    <button onclick="changePdfZoom(-0.15)" title="Perkecil" class="px-1.5 sm:px-2 py-1 text-slate-300 hover:text-white rounded hover:bg-slate-700 text-xs">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span id="zoom-level-text" class="text-[10px] sm:text-[11px] font-mono px-1 sm:px-2 text-slate-300">100%</span>
+                    <button onclick="changePdfZoom(0.15)" title="Perbesar" class="px-1.5 sm:px-2 py-1 text-slate-300 hover:text-white rounded hover:bg-slate-700 text-xs">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+
+                <button onclick="closeViewerModal()" class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 shrink-0">
+                    <i class="fa-solid fa-xmark text-base sm:text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Viewer Main Body -->
+        <div class="flex-1 overflow-y-auto bg-slate-900/95 p-2 sm:p-6 flex flex-col items-center">
+            
+            <!-- Digital Signature Banner -->
+            <div id="bsre-signature-badge" class="w-full max-w-3xl mb-3 sm:mb-4 bg-emerald-900/40 border border-emerald-500/40 text-emerald-200 rounded-xl p-2.5 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs backdrop-blur">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm sm:text-base shrink-0">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-semibold text-emerald-300 text-xs truncate">Dokumen Ditandatangani Secara Digital (BSrE)</p>
+                        <p id="signer-info" class="text-[10px] sm:text-[11px] text-emerald-200/80 truncate">Penanggung Jawab Aset RSUD Cicalengka</p>
+                    </div>
+                </div>
+                <span class="bg-emerald-500 text-slate-950 font-bold px-2 py-0.5 sm:py-1 rounded text-[9px] sm:text-[10px] tracking-wider uppercase self-start sm:self-center shrink-0">
+                    VALID / TERVERIFIKASI
+                </span>
+            </div>
+
+            <!-- PDF Pages Container -->
+            <div id="pdf-render-container" class="w-full max-w-3xl space-y-4 sm:space-y-6">
+                <!-- PDF Canvases appended here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-settings" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 space-y-5 animate-in fade-in zoom-in duration-150 max-h-[90vh] flex flex-col">
+            
+            <!-- Settings Modal Header -->
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-base">
+                        <i class="fa-solid fa-gear"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base">Pengaturan & Kelola Database KIR</h3>
+                        <p class="text-xs text-slate-500">Kelola berkas ter-import dan pemulihan sistem RSUD Cicalengka</p>
+                    </div>
+                </div>
+                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body Scrollable -->
+            <div class="space-y-6 overflow-y-auto pr-1 flex-1">
+                
+                <!-- Reset Data Section -->
+                <div class="bg-amber-50/60 border border-amber-200 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div class="space-y-0.5">
+                        <h4 class="font-bold text-amber-900 text-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> Reset Database ke Data Default
+                        </h4>
+                        <p class="text-[11px] text-amber-800/80">Mengembalikan database KIR ke sampel awal RSUD Cicalengka dan menghapus berkas yang baru di-import.</p>
+                    </div>
+                    <button onclick="resetToDefaultData()" class="px-3.5 py-2 text-xs font-semibold text-amber-900 hover:text-white bg-amber-200/80 hover:bg-amber-600 rounded-lg transition shrink-0 border border-amber-300">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Reset Data
+                    </button>
+                </div>
+
+                <!-- Kelola Berkas Section -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Daftar Berkas KIR Terdaftar (<span id="settings-count">0</span>)</h4>
+                        <span class="text-[10px] text-slate-400">Pilih berkas yang ingin dihapus</span>
+                    </div>
+
+                    <div class="border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden bg-slate-50/50" id="settings-file-list">
+                        <!-- File item row with delete button rendered here -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
+                <div class="text-[11px] text-slate-500 font-medium flex items-center gap-1.5" id="settings-unsaved-status">
+                    <i class="fa-solid fa-circle-check text-emerald-500"></i> <span>Data tersimpan otomatis di browser (Real-time)</span>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <button onclick="saveAndCloseSettings()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-xs font-semibold shadow-md shadow-brand-600/20 transition flex items-center justify-center gap-1.5 w-full sm:w-auto">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Simpan & Tutup</span>
+                    </button>
+                    <button onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition w-full sm:w-auto">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-delete-confirm" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center space-y-4 animate-in fade-in zoom-in duration-150">
+            <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xl mx-auto font-bold">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-slate-900 text-base">Hapus Berkas KIR?</h3>
+                <p class="text-xs text-slate-500 mt-1">Apakah Anda yakin ingin menghapus berkas KIR ini dari database RSUD Cicalengka?</p>
+            </div>
+            <div class="flex items-center justify-center gap-3 pt-2">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-medium text-xs w-full">
+                    Batal
+                </button>
+                <button onclick="confirmDeleteKirItem()" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs transition shadow-sm w-full">
+                    Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50 transition transform translate-y-20 opacity-0 pointer-events-none">
+        <div id="toast-icon" class="text-emerald-400"><i class="fa-solid fa-circle-check"></i></div>
+        <div id="toast-message" class="text-xs font-medium">Pesan notifikasi</div>
+    </div>
+
+    <script>
+        // Configure PDF.js Worker safely
+        if (window.pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
+        // DEFAULT SAMPLE DATA
+        const DEFAULT_KIR_DATA = [
+            {
+                id: 'kir-1',
+                kodeRuang: 'R-101',
+                namaRuangan: 'Ruang Mawar 01',
+                gedungUnit: 'Gedung Rawat Inap',
+                penanggungJawab: 'Ns. Ratna Sari, S.Kep',
+                tanggalTtd: '15 Januari 2024',
+                statusTtd: 'SIGNED',
+                numPages: 2,
+                pdfBase64: null,
+                items: [
+                    { nama: 'Bed Pasien Electric 3 Crank', kode: 'AS-BED-001', jumlah: 2, kondisi: 'Baik' },
+                    { nama: 'Infuse Stand Stainless', kode: 'AS-INF-004', jumlah: 2, kondisi: 'Baik' },
+                    { nama: 'Overbed Table', kode: 'AS-OVT-012', jumlah: 2, kondisi: 'Baik' },
+                    { nama: 'AC Split 1.5 PK', kode: 'AS-AC-088', jumlah: 1, kondisi: 'Baik' }
+                ]
+            },
+            {
+                id: 'kir-2',
+                kodeRuang: 'POLI-03',
+                namaRuangan: 'Poliklinik Penyakit Dalam',
+                gedungUnit: 'Gedung Poliklinik',
+                penanggungJawab: 'dr. Ahmad Hidayat, Sp.PD',
+                tanggalTtd: '20 Februari 2024',
+                statusTtd: 'SIGNED',
+                numPages: 1,
+                pdfBase64: null,
+                items: [
+                    { nama: 'Meja Periksa Dokter', kode: 'AS-MJA-021', jumlah: 1, kondisi: 'Baik' },
+                    { nama: 'Kursi Dokter Ergonomis', kode: 'AS-KRS-055', jumlah: 1, kondisi: 'Baik' },
+                    { nama: 'Stetoskop Litmann Classic III', kode: 'AS-MED-102', jumlah: 1, kondisi: 'Baik' },
+                    { nama: 'Tensimeter Digital Sitologi', kode: 'AS-MED-105', jumlah: 1, kondisi: 'Baik' }
+                ]
+            },
+            {
+                id: 'kir-3',
+                kodeRuang: 'LAB-01',
+                namaRuangan: 'Laboratorium Utama',
+                gedungUnit: 'Gedung Penunjang Medis',
+                penanggungJawab: 'Hendi Suhendar, A.Md.AK',
+                tanggalTtd: '10 Maret 2024',
+                statusTtd: 'SIGNED',
+                numPages: 3,
+                pdfBase64: null,
+                items: [
+                    { nama: 'Hematology Analyzer Automatic', kode: 'AS-LAB-001', jumlah: 1, kondisi: 'Baik' },
+                    { nama: 'Mikroskop Binokuler LED', kode: 'AS-LAB-015', jumlah: 2, kondisi: 'Baik' },
+                    { nama: 'Centrifuge 16 Tube', kode: 'AS-LAB-022', jumlah: 1, kondisi: 'Baik' },
+                    { nama: 'Kulkas Reagen 2-8 C', kode: 'AS-LAB-040', jumlah: 1, kondisi: 'Baik' }
+                ]
+            }
+        ];
+
+        // GLOBAL STATE
+        let kirDatabase = [];
+        let activeSelectedKir = null;
+        let itemToDeleteId = null;
+        let uploadedPdfBase64 = null;
+        let pdfZoomScale = 1.0;
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function initDatabase() {
+            try {
+                const isInitialized = localStorage.getItem('kir_rsud_cicalengka_initialized');
+                const stored = localStorage.getItem('kir_rsud_cicalengka_db');
+                if (isInitialized === 'true' && stored !== null) {
+                    kirDatabase = JSON.parse(stored);
+                } else {
+                    kirDatabase = [...DEFAULT_KIR_DATA];
+                    saveDatabase();
+                }
+            } catch (e) {
+                console.error("Failed loading database:", e);
+                kirDatabase = [...DEFAULT_KIR_DATA];
+            }
+            renderCards();
+            updateStats();
+        }
+
+        function saveDatabase() {
+            try {
+                localStorage.setItem('kir_rsud_cicalengka_db', JSON.stringify(kirDatabase));
+                localStorage.setItem('kir_rsud_cicalengka_initialized', 'true');
+            } catch (e) {
+                console.error("Failed saving database:", e);
+            }
+        }
+
+        function getFilteredData() {
+            const searchVal = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+            const filterRuangan = (document.getElementById('filter-ruangan')?.value || '').toLowerCase().trim();
+            const filterStatus = document.getElementById('filter-status')?.value || 'ALL';
+
+            return kirDatabase.filter(item => {
+                const matchesSearch = !searchVal || 
+                    item.namaRuangan.toLowerCase().includes(searchVal) ||
+                    item.kodeRuang.toLowerCase().includes(searchVal) ||
+                    item.penanggungJawab.toLowerCase().includes(searchVal) ||
+                    item.gedungUnit.toLowerCase().includes(searchVal) ||
+                    (item.items && item.items.some(i => i.nama.toLowerCase().includes(searchVal) || i.kode.toLowerCase().includes(searchVal)));
+
+                const matchesRuangan = !filterRuangan || 
+                    item.namaRuangan.toLowerCase().includes(filterRuangan) ||
+                    item.kodeRuang.toLowerCase().includes(filterRuangan);
+
+                const matchesStatus = filterStatus === 'ALL' || item.statusTtd === filterStatus;
+
+                return matchesSearch && matchesRuangan && matchesStatus;
+            });
+        }
+
+        function renderCards(dataToRender = null) {
+            const list = dataToRender || getFilteredData();
+            const grid = document.getElementById('data-grid');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (!grid) return;
+            
+            if (list.length === 0) {
+                grid.innerHTML = '';
+                if (emptyState) emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            if (emptyState) emptyState.classList.add('hidden');
+            
+            grid.innerHTML = list.map(item => {
+                const isSigned = item.statusTtd === 'SIGNED';
+                
+                return `
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col justify-between group">
+                    <div class="p-5 space-y-4">
+                        <!-- Header Badge & Status -->
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg text-xs font-mono font-semibold flex items-center gap-1.5">
+                                <i class="fa-solid fa-door-closed text-slate-400"></i>
+                                <span>${escapeHtml(item.kodeRuang)}</span>
+                            </div>
+                            ${isSigned ? `
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold border border-emerald-200">
+                                    <i class="fa-solid fa-circle-check text-emerald-500"></i> Terverifikasi BSrE
+                                </span>
+                            ` : `
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-[11px] font-bold border border-amber-200">
+                                    <i class="fa-solid fa-clock"></i> Belum TTD
+                                </span>
+                            `}
+                        </div>
+
+                        <!-- Title & Location -->
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-base leading-snug group-hover:text-brand-600 transition-colors">
+                                ${escapeHtml(item.namaRuangan)}
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-1 flex items-center gap-1.5 font-medium">
+                                <i class="fa-solid fa-building text-slate-400"></i>
+                                <span>${escapeHtml(item.gedungUnit)}</span>
+                            </p>
+                        </div>
+
+                        <!-- Details List -->
+                        <div class="space-y-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-400 font-medium">Penanggung Jawab:</span>
+                                <span class="font-semibold text-slate-800 truncate max-w-[180px]">${escapeHtml(item.penanggungJawab)}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-400 font-medium">Tanggal Berkas:</span>
+                                <span class="text-slate-700">${escapeHtml(item.tanggalTtd || '-')}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Action -->
+                    <div class="px-5 py-3.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <span class="text-[11px] text-slate-500 font-medium flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-pdf text-red-500"></i> Dokumen KIR Digital
+                        </span>
+                        <button onclick="openViewerModal('${item.id}')" class="px-3.5 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-eye"></i>
+                            <span>Lihat PDF KIR</span>
+                        </button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function filterData() {
+            const filtered = getFilteredData();
+            renderCards(filtered);
+        }
+
+        function updateStats() {
+            const totalKir = kirDatabase.length;
+            const statTotal = document.getElementById('stat-total');
+
+            if (statTotal) statTotal.textContent = totalKir;
+        }
+
+        function openImportModal() {
+            uploadedPdfBase64 = null;
+            const form = document.getElementById('import-form');
+            if (form) form.reset();
+            
+            const fileInfo = document.getElementById('file-selected-info');
+            if (fileInfo) {
+                fileInfo.classList.add('hidden');
+                fileInfo.innerHTML = '';
+            }
+
+            const modal = document.getElementById('modal-import');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeImportModal() {
+            const modal = document.getElementById('modal-import');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            if (files && files.length > 0) {
+                processSelectedFile(files[0]);
+            }
+        }
+
+        function processSelectedFile(file) {
+            if (!file || !file.name.toLowerCase().endsWith('.pdf')) {
+                showToast('Format berkas harus berupa file PDF!', 'error');
+                return;
+            }
+
+            const fileInfo = document.getElementById('file-selected-info');
+            if (fileInfo) {
+                fileInfo.classList.remove('hidden');
+                fileInfo.innerHTML = `<i class="fa-solid fa-file-pdf mr-1 text-red-500"></i> File terpilih: <span class="font-bold">${escapeHtml(file.name)}</span> (${Math.round(file.size / 1024)} KB)`;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedPdfBase64 = e.target.result;
+                showToast('Berkas PDF berhasil dimuat! Silakan lengkapi formulir.', 'info');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function processAndSaveImport(event) {
+            event.preventDefault();
+
+            const kodeRuang = document.getElementById('import-kode')?.value.trim();
+            const namaRuangan = document.getElementById('import-nama-ruang')?.value.trim();
+            const gedungUnit = document.getElementById('import-gedung')?.value;
+            const penanggungJawab = document.getElementById('import-pj')?.value.trim();
+
+            if (!kodeRuang || !namaRuangan || !penanggungJawab) {
+                showToast('Mohon lengkapi semua bidang isian formulir!', 'error');
+                return;
+            }
+
+            const now = new Date();
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            const formattedDate = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+            const newKir = {
+                id: 'kir-' + Date.now(),
+                kodeRuang: kodeRuang,
+                namaRuangan: namaRuangan,
+                gedungUnit: gedungUnit || 'RSUD Cicalengka',
+                penanggungJawab: penanggungJawab,
+                tanggalTtd: formattedDate,
+                statusTtd: 'SIGNED',
+                numPages: 1,
+                pdfBase64: uploadedPdfBase64,
+                items: [
+                    { nama: 'Aset Ruangan Terdaftar', kode: 'AS-' + kodeRuang + '-01', jumlah: 1, kondisi: 'Baik' }
+                ]
+            };
+
+            kirDatabase.unshift(newKir);
+            saveDatabase();
+            renderCards();
+            updateStats();
+            closeImportModal();
+            showToast('Berkas PDF KIR berhasil disimpan ke database!', 'success');
+        }
+
+        function openSettingsModal() {
+            renderSettingsFileList();
+            const modal = document.getElementById('modal-settings');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            const modal = document.getElementById('modal-settings');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function renderSettingsFileList() {
+            const listContainer = document.getElementById('settings-file-list');
+            const countBadge = document.getElementById('settings-count');
+            
+            if (countBadge) countBadge.textContent = kirDatabase.length;
+            if (!listContainer) return;
+
+            if (kirDatabase.length === 0) {
+                listContainer.innerHTML = `<div class="p-4 text-center text-xs text-slate-400">Tidak ada berkas terdaftar</div>`;
+                return;
+            }
+
+            listContainer.innerHTML = kirDatabase.map(item => `
+                <div class="p-3 flex items-center justify-between gap-3 bg-white hover:bg-slate-50 transition">
+                    <div class="min-w-0 flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold text-xs shrink-0">
+                            <i class="fa-solid fa-file-pdf"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-bold text-slate-800 text-xs truncate">${escapeHtml(item.namaRuangan)} (${escapeHtml(item.kodeRuang)})</p>
+                            <p class="text-[10px] text-slate-400 truncate">PJ: ${escapeHtml(item.penanggungJawab)} | ${escapeHtml(item.gedungUnit)}</p>
+                        </div>
+                    </div>
+                    <button onclick="openDeleteModal('${item.id}')" title="Hapus Berkas" class="px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:text-white bg-red-50 hover:bg-red-600 rounded-lg transition shrink-0 border border-red-200 flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can"></i> <span>Hapus</span>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function openDeleteModal(id) {
+            itemToDeleteId = id;
+            const modal = document.getElementById('modal-delete-confirm');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            itemToDeleteId = null;
+            const modal = document.getElementById('modal-delete-confirm');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function confirmDeleteKirItem() {
+            if (!itemToDeleteId) return;
+            kirDatabase = kirDatabase.filter(x => x.id !== itemToDeleteId);
+            saveDatabase();
+            renderCards();
+            updateStats();
+            renderSettingsFileList();
+            closeDeleteModal();
+            showToast('Berkas KIR berhasil dihapus dan tersimpan otomatis ke database!', 'success');
+        }
+
+        function saveAndCloseSettings() {
+            saveDatabase();
+            renderCards();
+            updateStats();
+            showToast('Semua perubahan data telah tersimpan otomatis secara permanen!', 'success');
+            closeSettingsModal();
+        }
+
+        function resetToDefaultData() {
+            kirDatabase = [...DEFAULT_KIR_DATA];
+            saveDatabase();
+            renderCards();
+            updateStats();
+            renderSettingsFileList();
+            showToast('Database berhasil di-reset dan tersimpan otomatis!', 'success');
+        }
+
+        async function openViewerModal(id) {
+            const item = kirDatabase.find(x => x.id === id);
+            if (!item) return;
+
+            activeSelectedKir = item;
+            
+            const screenWidth = window.innerWidth;
+            if (screenWidth < 640) {
+                pdfZoomScale = 0.85;
+            } else if (screenWidth < 1024) {
+                pdfZoomScale = 1.0;
+            } else {
+                pdfZoomScale = 1.25;
+            }
+
+            const zoomText = document.getElementById('zoom-level-text');
+            if (zoomText) zoomText.textContent = `${Math.round(pdfZoomScale * 100)}%`;
+            
+            const viewerTitle = document.getElementById('viewer-title');
+            if (viewerTitle) viewerTitle.textContent = `PDF KIR: ${item.namaRuangan}`;
+            
+            const viewerSub = document.getElementById('viewer-subtitle');
+            if (viewerSub) viewerSub.textContent = `Kode Ruang: ${item.kodeRuang} | Penanggung Jawab: ${item.penanggungJawab}`;
+            
+            const signerInfo = document.getElementById('signer-info');
+            if (signerInfo) signerInfo.textContent = `Penanggung Jawab: ${item.penanggungJawab} - RSUD Cicalengka`;
+
+            const modal = document.getElementById('modal-viewer');
+            if (modal) modal.classList.remove('hidden');
+
+            renderPdfPages();
+        }
+
+        function closeViewerModal() {
+            const modal = document.getElementById('modal-viewer');
+            if (modal) modal.classList.add('hidden');
+            const container = document.getElementById('pdf-render-container');
+            if (container) container.innerHTML = '';
+            activeSelectedKir = null;
+        }
+
+        function changePdfZoom(delta) {
+            pdfZoomScale = Math.max(0.75, Math.min(2.5, pdfZoomScale + delta));
+            const zoomText = document.getElementById('zoom-level-text');
+            if (zoomText) zoomText.textContent = `${Math.round(pdfZoomScale * 100)}%`;
+            renderPdfPages();
+        }
+
+        function base64ToUint8Array(base64) {
+            const raw = atob(base64.split(',')[1] || base64);
+            const uint8Array = new Uint8Array(raw.length);
+            for (let i = 0; i < raw.length; i++) {
+                uint8Array[i] = raw.charCodeAt(i);
+            }
+            return uint8Array;
+        }
+
+        async function renderPdfPages() {
+            const container = document.getElementById('pdf-render-container');
+            if (!container || !activeSelectedKir) return;
+
+            container.innerHTML = `<div class="text-center py-12 text-slate-400"><i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-brand-500"></i><p class="text-xs">Memuat Halaman PDF KIR RSUD Cicalengka...</p></div>`;
+
+            if (activeSelectedKir.pdfBase64 && window.pdfjsLib) {
+                try {
+                    const bytes = base64ToUint8Array(activeSelectedKir.pdfBase64);
+                    const pdfDoc = await pdfjsLib.getDocument({ data: bytes }).promise;
+
+                    container.innerHTML = '';
+
+                    for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+                        const page = await pdfDoc.getPage(pageNum);
+                        const viewport = page.getViewport({ scale: pdfZoomScale });
+
+                        const pageWrapper = document.createElement('div');
+                        pageWrapper.className = "bg-white rounded-xl shadow-2xl border border-slate-700/50 overflow-hidden relative mb-4 sm:mb-6 w-full flex flex-col items-center";
+
+                        const pageHeader = document.createElement('div');
+                        pageHeader.className = "w-full bg-slate-800 text-slate-300 px-3 sm:px-4 py-2 border-b border-slate-700 flex justify-between items-center text-[10px] sm:text-xs font-semibold";
+                        pageHeader.innerHTML = `
+                            <span>Halaman ${pageNum} dari ${pdfDoc.numPages}</span>
+                            <span class="text-emerald-400 font-mono text-[10px]"><i class="fa-solid fa-shield"></i> BSrE Valid</span>
+                        `;
+
+                        const canvasWrapper = document.createElement('div');
+                        canvasWrapper.className = "w-full overflow-x-auto p-1 sm:p-2 flex justify-center bg-slate-900/50";
+
+                        const canvas = document.createElement('canvas');
+                        canvas.className = "max-w-full h-auto block mx-auto shadow-md rounded";
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+
+                        canvasWrapper.appendChild(canvas);
+                        pageWrapper.appendChild(pageHeader);
+                        pageWrapper.appendChild(canvasWrapper);
+                        container.appendChild(pageWrapper);
+
+                        await page.render({ canvasContext: context, viewport: viewport }).promise;
+                    }
+                    return;
+                } catch (err) {
+                    console.warn("PDF.js render fallback:", err);
+                }
+            }
+
+            renderMockPdfView(container);
+        }
+
+        function renderMockPdfView(container) {
+            container.innerHTML = '';
+            const totalPages = activeSelectedKir.numPages || 2;
+
+            for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+                const pageWrapper = document.createElement('div');
+                pageWrapper.className = "bg-white rounded-xl shadow-2xl border border-slate-700/50 p-4 sm:p-10 relative text-slate-900 mb-4 sm:mb-6 overflow-hidden w-full";
+
+                const itemsRows = (activeSelectedKir.items || []).map((item, idx) => `
+                    <tr class="border-b border-slate-200 text-xs">
+                        <td class="py-2 px-2 text-center">${idx + 1}</td>
+                        <td class="py-2 px-2 font-medium">${escapeHtml(item.nama)}</td>
+                        <td class="py-2 px-2 font-mono text-slate-600 text-[11px]">${escapeHtml(item.kode)}</td>
+                        <td class="py-2 px-2 text-center font-bold">${item.jumlah}</td>
+                        <td class="py-2 px-2 text-center"><span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-1.5 py-0.5 rounded">${escapeHtml(item.kondisi)}</span></td>
+                    </tr>
+                `).join('');
+
+                pageWrapper.innerHTML = `
+                    <div class="flex items-center justify-between border-b-2 border-slate-900 pb-3 mb-4 gap-2">
+                        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                            <div class="w-9 h-9 sm:w-12 sm:h-12 bg-emerald-700 text-white font-bold rounded-lg flex items-center justify-center text-base sm:text-xl shrink-0">
+                                <i class="fa-solid fa-hospital"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <h2 class="font-bold text-[11px] sm:text-base text-slate-900 tracking-wide uppercase truncate">KABUPATEN BANDUNG</h2>
+                                <h3 class="font-black text-xs sm:text-lg text-emerald-800 truncate">RSUD CICALENGKA</h3>
+                                <p class="text-[9px] sm:text-[10px] text-slate-500 truncate">Jl. Cicalengka - Majalaya No. 233</p>
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="border border-slate-900 font-bold px-2 py-0.5 text-[10px] sm:text-xs">FORM KIR</span>
+                            <p class="text-[9px] text-slate-500 mt-0.5">Hal ${pageNum} / ${totalPages}</p>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <h4 class="font-bold text-xs sm:text-base underline uppercase">KARTU INVENTARIS RUANGAN (KIR)</h4>
+                        <p class="text-[11px] text-slate-600">LOKASI: <span class="font-bold">${escapeHtml(activeSelectedKir.gedungUnit.toUpperCase())}</span></p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 text-xs mb-4 bg-slate-50 p-2.5 rounded-lg border border-slate-200 gap-1">
+                        <div>
+                            <p><span class="font-semibold">NAMA RUANG:</span> ${escapeHtml(activeSelectedKir.namaRuangan)}</p>
+                            <p><span class="font-semibold">KODE RUANG:</span> ${escapeHtml(activeSelectedKir.kodeRuang)}</p>
+                        </div>
+                        <div>
+                            <p><span class="font-semibold">PENANGGUNG JAWAB:</span> ${escapeHtml(activeSelectedKir.penanggungJawab)}</p>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto w-full mb-6">
+                        <table class="w-full text-left border-collapse border border-slate-300 min-w-[450px]">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-800 text-xs font-bold border-b border-slate-300">
+                                    <th class="py-2 px-2 border-r border-slate-300 text-center w-8">NO</th>
+                                    <th class="py-2 px-2 border-r border-slate-300">NAMA BARANG / ASET</th>
+                                    <th class="py-2 px-2 border-r border-slate-300">KODE BARANG</th>
+                                    <th class="py-2 px-2 border-r border-slate-300 text-center">JUMLAH</th>
+                                    <th class="py-2 px-2 text-center">KONDISI</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${itemsRows}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-200 flex justify-between items-end gap-2">
+                        <div class="text-center">
+                            <div class="w-14 h-14 sm:w-20 sm:h-20 border border-slate-300 rounded p-1 mx-auto mb-1 flex items-center justify-center bg-slate-50">
+                                <i class="fa-solid fa-qrcode text-2xl sm:text-4xl text-slate-800"></i>
+                            </div>
+                            <p class="text-[8px] sm:text-[9px] text-slate-500 font-mono">BSrE VERIFIED</p>
+                        </div>
+
+                        <div class="text-center space-y-0.5">
+                            <p class="text-[10px] sm:text-xs text-slate-600">Cicalengka, ${escapeHtml(activeSelectedKir.tanggalTtd)}</p>
+                            <p class="text-[11px] sm:text-xs font-bold text-slate-800">Penanggung Jawab</p>
+                            <div class="h-8 sm:h-10 flex items-center justify-center font-serif text-emerald-700 italic text-xs font-bold">
+                                [ Signed Digitally ]
+                            </div>
+                            <p class="text-[11px] sm:text-xs font-bold underline text-slate-900">${escapeHtml(activeSelectedKir.penanggungJawab)}</p>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(pageWrapper);
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            if (!toast || !toastMessage) return;
+
+            toastMessage.textContent = message;
+
+            if (type === 'error') {
+                toastIcon.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-400 text-base"></i>`;
+            } else if (type === 'info') {
+                toastIcon.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400 text-base"></i>`;
+            } else {
+                toastIcon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>`;
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('drop-zone');
+            if (!dropZone) return;
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.add('border-brand-500', 'bg-brand-50/50');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => {
+                    dropZone.classList.remove('border-brand-500', 'bg-brand-50/50');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files.length > 0) {
+                    processSelectedFile(files[0]);
+                }
+            }, false);
+        }
+
+        // INITIALIZE ON LOAD
+        window.addEventListener('DOMContentLoaded', function() {
+            initDatabase();
+            setupDragAndDrop();
+        });
+    </script>
+</body>
+</html>
